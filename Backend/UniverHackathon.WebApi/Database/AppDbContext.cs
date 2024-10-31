@@ -19,6 +19,7 @@ public class AppDbContext : IdentityDbContext<UserEntity, IdentityRole<Guid>, Gu
 
     public DbSet<UserEntity> UserEntities { get; set; }
     public DbSet<EventEntity> EventEntities { get; set; }
+    public DbSet<OfferEntity> OfferEntities { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

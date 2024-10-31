@@ -56,4 +56,13 @@ public class UserController : ControllerBase
 
         return await getListUserRatingConstructor.GetUsersRating();
     }
+
+    [HttpPatch("addUserRatingForOffer")]
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<bool> AddUserRatingForOffer([FromQuery] Guid userId)
+    {
+        var addUserRatingConstructor = new AddUserRating(_dbContext);
+
+        return await addUserRatingConstructor.AddUserRatingForOffer(userId);
+    }
 }

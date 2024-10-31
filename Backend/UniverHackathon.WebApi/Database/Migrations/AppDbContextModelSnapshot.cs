@@ -198,6 +198,30 @@ namespace UniverHackathon.WebApi.Database.Migrations
                     b.ToTable("events");
                 });
 
+            modelBuilder.Entity("UniverHackathon.WebApi.Database.Entities.OfferEntity", b =>
+                {
+                    b.Property<long>("OfferId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("OfferId"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Topic")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("OfferId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("offers");
+                });
+
             modelBuilder.Entity("UniverHackathon.WebApi.Database.Entities.UserEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -335,6 +359,17 @@ namespace UniverHackathon.WebApi.Database.Migrations
                 });
 
             modelBuilder.Entity("UniverHackathon.WebApi.Database.Entities.EventEntity", b =>
+                {
+                    b.HasOne("UniverHackathon.WebApi.Database.Entities.UserEntity", "UserEntity")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserEntity");
+                });
+
+            modelBuilder.Entity("UniverHackathon.WebApi.Database.Entities.OfferEntity", b =>
                 {
                     b.HasOne("UniverHackathon.WebApi.Database.Entities.UserEntity", "UserEntity")
                         .WithMany()

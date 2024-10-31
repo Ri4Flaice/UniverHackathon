@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -190,6 +190,27 @@ namespace UniverHackathon.WebApi.Database.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "offers",
+                columns: table => new
+                {
+                    OfferId = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Topic = table.Column<string>(type: "text", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_offers", x => x.OfferId);
+                    table.ForeignKey(
+                        name: "FK_offers_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -231,6 +252,11 @@ namespace UniverHackathon.WebApi.Database.Migrations
                 name: "IX_events_UserId",
                 table: "events",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_offers_UserId",
+                table: "offers",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -253,6 +279,9 @@ namespace UniverHackathon.WebApi.Database.Migrations
 
             migrationBuilder.DropTable(
                 name: "events");
+
+            migrationBuilder.DropTable(
+                name: "offers");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
