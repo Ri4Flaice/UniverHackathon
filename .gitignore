@@ -3,5 +3,5 @@ bin/
 obj/
 
 appsettings.Local.json
-
+venv
 !.gitignore

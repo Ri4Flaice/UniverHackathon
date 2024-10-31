@@ -13,6 +13,22 @@ services:
     networks:
       - univerHackathon.dev
 
+  app:
+      container_name: python_api
+      build:
+        context: .
+        dockerfile: Scripts/Dockerfile
+      ports:
+        - "8008:8008"
+      expose:
+        - "8008"
+      volumes:
+        - .:/slava_api
+      depends_on:
+        - postgres
+      networks:
+        - univerHackathon.dev
+
 networks:
   univerHackathon.dev:
     driver: bridge
