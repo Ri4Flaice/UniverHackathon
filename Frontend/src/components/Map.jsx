@@ -1,10 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
 import { load } from "@2gis/mapgl";
+import axios from "axios";
 
 const Map = () => {
   const [query, setQuery] = useState("");
   const [formVisible, setFormVisible] = useState(false);
-  const [formData, setFormData] = useState({ info: "", location: null });
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    dateStart: "",
+    dateEnd: "",
+    address: "",
+    coordinates: null,
+    eventStatus: "",
+    file: null,
+  });
   const mapContainer = useRef(null);
   const mapInstance = useRef(null);
 
@@ -12,11 +22,24 @@ const Map = () => {
     import.meta.env.VITE_MAP_KEY
   }`;
 
+  const someExample = async (url, data, token) => {
+    try {
+      const response = await axios.post(url, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error posting data:", error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
-    let map;
     const initializeMap = async () => {
       const mapglAPI = await load();
-      map = new mapglAPI.Map(mapContainer.current, {
+      const map = new mapglAPI.Map(mapContainer.current, {
         center: [69.135137, 54.875406],
         zoom: 13,
         key: import.meta.env.VITE_MAP_KEY,
@@ -25,10 +48,10 @@ const Map = () => {
 
       // Add click event listener to the map
       map.on("click", (event) => {
-        const coordinates = event.lngLat; // Get the coordinates of the click
+        const coordinates = event.lngLat;
         console.log("Clicked coordinates:", coordinates);
-        setFormData({ ...formData, location: coordinates });
-        setFormVisible(true); // Show the form when a location is clicked
+        setFormData((prev) => ({ ...prev, coordinates }));
+        setFormVisible(true);
       });
     };
 
@@ -56,14 +79,17 @@ const Map = () => {
   };
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, files } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value,
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form submitted with data:", formData);
-    // Handle form submission logic here (e.g., API call)
-    setFormVisible(false); // Hide the form after submission
+    setFormVisible(false);
   };
 
   return (
@@ -90,17 +116,75 @@ const Map = () => {
       </div>
       <div>
         {formVisible && (
-          <div className="bg-white flex-2 min-w-[400px] rounded-lg p-4 shadow-md mt-2">
-            <h2 className="text-lg font-bold mb-2">Информация о здании</h2>
+          <div className="bg-white max-w-[400px] rounded-lg p-4 shadow-md mt-2">
+            <h2 className="text-lg font-bold mb-2">Информация о событии</h2>
             <form onSubmit={handleSubmit}>
-              <textarea
-                name="info"
-                placeholder="Сообщите о проблеме..."
-                value={formData.info}
+              <input
+                type="text"
+                name="name"
+                placeholder="Название"
+                value={formData.name}
                 onChange={handleInputChange}
                 className="border p-2 w-full rounded-lg mb-2"
-                rows={4}
+              />
+              <textarea
+                name="description"
+                placeholder="Описание"
+                value={formData.description}
+                onChange={handleInputChange}
+                className="border p-2 w-full rounded-lg mb-2"
+                rows={3}
+              />
+              <input
+                type="datetime-local"
+                name="dateStart"
+                value={formData.dateStart}
+                onChange={handleInputChange}
                 required
+                className="border p-2 w-full rounded-lg mb-2"
+              />
+              <input
+                type="datetime-local"
+                name="dateEnd"
+                value={formData.dateEnd}
+                onChange={handleInputChange}
+                required
+                className="border p-2 w-full rounded-lg mb-2"
+              />
+              <input
+                type="text"
+                name="address"
+                placeholder="Адрес"
+                value={formData.address}
+                onChange={handleInputChange}
+                className="border p-2 w-full rounded-lg mb-2"
+              />
+              <input
+                type="text"
+                name="coordinates"
+                placeholder="Координаты"
+                value={
+                  formData.coordinates
+                    ? `${formData.coordinates[0]}, ${formData.coordinates[1]}`
+                    : ""
+                }
+                readOnly
+                className="border p-2 w-full rounded-lg mb-2"
+              />
+              <input
+                type="number"
+                name="eventStatus"
+                placeholder="Статус события"
+                value={formData.eventStatus}
+                onChange={handleInputChange}
+                required
+                className="border p-2 w-full rounded-lg mb-2"
+              />
+              <input
+                type="file"
+                name="file"
+                onChange={handleInputChange}
+                className="border p-2 w-full rounded-lg mb-2"
               />
               <button
                 type="submit"
