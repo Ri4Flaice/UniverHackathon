@@ -1,19 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const Auth = () => {
   const [registerShow, setRegisterShow] = useState(false);
   const [loginShow, setLoginShow] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [registerData, setRegisterData] = useState({
-    name: "",
+    fullName: "",
     login: "",
     password: "",
-    phone: "",
+    phoneNumber: "",
     email: "",
   });
   const [loginData, setLoginData] = useState({
     phone: "",
     password: "",
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem("jwtToken");
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   const handleRegisterInputChange = (e) => {
     const { name, value } = e.target;
@@ -25,49 +34,89 @@ const Auth = () => {
     setLoginData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    console.log("Registration Form submitted:", registerData);
-    // Handle registration logic here (e.g., API call)
+    try {
+      const response = await axios.post(
+        "http://localhost:8081/api/User/create",
+        {
+          phoneNumber: registerData.phoneNumber,
+          password: registerData.password,
+          fullName: registerData.fullName,
+          login: registerData.login,
+          email: registerData.email,
+        }
+      );
+      setRegisterShow(false);
+    } catch (error) {
+      console.error("Registration failed:", error);
+    }
   };
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login Form submitted:", loginData);
-    // Handle login logic here (e.g., API call)
+    try {
+      const response = await axios.post(
+        "http://localhost:8081/api/User/login",
+        {
+          phoneNumber: loginData.phone,
+          password: loginData.password,
+        }
+      );
+      const token = response.data;
+      localStorage.setItem("jwtToken", token);
+      setIsLoggedIn(true);
+      setLoginShow(false);
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("jwtToken");
+    setIsLoggedIn(false);
   };
 
   return (
     <div>
-      <div className="flex gap-4 items-center">
+      {!isLoggedIn ? (
+        <div className="flex gap-4 items-center">
+          <button
+            onClick={() => setRegisterShow((prev) => !prev)}
+            className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition"
+          >
+            Регистрация
+          </button>
+          <button
+            onClick={() => setLoginShow((prev) => !prev)}
+            className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition"
+          >
+            Вход
+          </button>
+        </div>
+      ) : (
         <button
-          onClick={() => setRegisterShow((prev) => !prev)}
-          className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition"
+          onClick={handleLogout}
+          className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 transition"
         >
-          Регистрация
+          Выйти
         </button>
-        <button
-          onClick={() => setLoginShow((prev) => !prev)}
-          className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition"
-        >
-          Вход
-        </button>
-      </div>
+      )}
       {/* Registration Modal */}
       {registerShow && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 shadow-md w-96 text-black">
             <h2 className="text-xl font-bold mb-4">Регистрация</h2>
             <form onSubmit={handleRegisterSubmit}>
               <div className="mb-4">
-                <label htmlFor="name" className="block mb-1">
+                <label htmlFor="fullName" className="block mb-1">
                   Имя
                 </label>
                 <input
                   type="text"
-                  name="name"
-                  id="name"
-                  value={registerData.name}
+                  name="fullName"
+                  id="fullName"
+                  value={registerData.fullName}
                   onChange={handleRegisterInputChange}
                   className="border p-2 w-full rounded outline-none"
                   placeholder="Введите ваше имя"
@@ -105,14 +154,14 @@ const Auth = () => {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="phone" className="block mb-1">
+                <label htmlFor="phoneNumber" className="block mb-1">
                   Телефон
                 </label>
                 <input
                   type="tel"
-                  name="phone"
-                  id="phone"
-                  value={registerData.phone}
+                  name="phoneNumber"
+                  id="phoneNumber"
+                  value={registerData.phoneNumber}
                   onChange={handleRegisterInputChange}
                   className="border p-2 w-full rounded outline-none"
                   placeholder="Введите номер телефона"
@@ -152,7 +201,7 @@ const Auth = () => {
       )}
 
       {loginShow && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 shadow-md w-96 text-black">
             <h2 className="text-xl font-bold mb-4">Вход</h2>
             <form onSubmit={handleLoginSubmit}>

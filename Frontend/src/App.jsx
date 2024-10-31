@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Events from "./components/Events";
@@ -8,14 +7,13 @@ import Feedback from "./components/Feedback";
 import EmergencyButton from "./components/EmergencyButton";
 import Main from "./components/Main";
 import Map from "./components/Map";
-import { useState } from "react";
 import Auth from "./components/Auth";
 
 function App() {
   return (
     <Router>
       <div className="bg-gray-100 min-h-screen">
-        <header className="bg-red-900 text-white p-4 flex justify-between">
+        <header className="bg-gray-900 text-white p-4 flex justify-between">
           <Link className="text-xl font-bold" to="/">
             ПЕТРОПАВЛОВСК
           </Link>
@@ -45,7 +43,7 @@ function App() {
           <Auth />
         </header>
 
-        <main className="p-4">
+        <main className="">
           <Routes>
             <Route path="/" element={<Main />} />
             <Route path="/events" element={<Events />} />
