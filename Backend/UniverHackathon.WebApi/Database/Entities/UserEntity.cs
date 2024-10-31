@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
+using UniverHackathon.WebApi.Enums;
 
 namespace UniverHackathon.WebApi.Database.Entities;
 
@@ -16,4 +17,5 @@ public class UserEntity : IdentityUser<Guid>
     public DateTime DateRegistration { get; set; }
     
     public bool Status { get; set; }
+    public AccountType AccountType { get; set; }
 }

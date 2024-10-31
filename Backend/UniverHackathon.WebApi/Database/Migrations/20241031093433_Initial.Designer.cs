@@ -12,7 +12,7 @@ using UniverHackathon.WebApi.Database;
 namespace UniverHackathon.WebApi.Database.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241031064014_Initial")]
+    [Migration("20241031093433_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -208,6 +208,9 @@ namespace UniverHackathon.WebApi.Database.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AccountType")
                         .HasColumnType("integer");
 
                     b.Property<string>("ConcurrencyStamp")

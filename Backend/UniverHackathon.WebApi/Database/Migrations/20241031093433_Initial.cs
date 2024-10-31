@@ -35,6 +35,7 @@ namespace UniverHackathon.WebApi.Database.Migrations
                     Login = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     DateRegistration = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Status = table.Column<bool>(type: "boolean", nullable: false),
+                    AccountType = table.Column<int>(type: "integer", nullable: false),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
