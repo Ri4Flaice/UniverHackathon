@@ -74,44 +74,46 @@ const Map = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted with data:", formData);
 
     const formDataToSend = new FormData();
     formDataToSend.append("name", formData.name);
     formDataToSend.append("description", formData.description);
-    formDataToSend.append(
-      "dateStart",
-      new Date(formData.dateStart).toISOString()
-    ); // Convert to ISO 8601 format
-    formDataToSend.append("dateEnd", new Date(formData.dateEnd).toISOString()); // Convert to ISO 8601 format
+    formDataToSend.append("dateStart", new Date(formData.dateStart).toISOString()); // Убедитесь, что формат ISO
+    formDataToSend.append("dateEnd", new Date(formData.dateEnd).toISOString()); // Убедитесь, что формат ISO
     formDataToSend.append("address", formData.address);
-    formDataToSend.append(
-      "coordinates",
-      formData.coordinates
-        ? JSON.stringify(formData.coordinates.map(String))
-        : null
-    ); // Convert coordinates to an array of strings
-    formDataToSend.append("eventStatus", formData.eventStatus); // Send as a number
-    formDataToSend.append("file", formData.file);
+    // Преобразование координат в массив чисел
+    formDataToSend.append("coordinates", JSON.stringify(formData.coordinates.map(Number))); // Преобразуем в числа
+    formDataToSend.append("eventStatus", Number(formData.eventStatus)); // Убедитесь, что это число
+  if (formData.file) {
+        formDataToSend.append("file", formData.file);
+    }
+    // Для отладки: выводим все данные, которые собираемся отправить
+    for (let [key, value] of formDataToSend.entries()) {
+        console.log(`${key}: ${value}`);
+    }
 
     try {
-      const response = await axios.post(
-        "http://localhost:8008/events",
-        formDataToSend,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log("Response:", response.data);
-      setFormVisible(false);
+        const response = await axios.post(
+            "http://localhost:8008/events/",
+            formDataToSend,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        console.log("Response:", response.data);
+        setFormVisible(false);
     } catch (error) {
-      console.error("Error posting data:", error);
+        console.error("Error posting data:", error.response?.data || error.message);
+        if (error.response && error.response.data && error.response.data.detail) {
+            console.error("Detailed errors:", error.response.data.detail);
+        }
     }
-  };
+};
 
   return (
     <div className="flex items-start m-4">

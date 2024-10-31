@@ -122,15 +122,15 @@ const Auth = () => {
           <div className="bg-white rounded-lg p-6 shadow-md w-96 text-black">
             <h2 className="text-xl font-bold mb-4">Вход</h2>
             <form onSubmit={handleLoginSubmit}>
-              <div className="mb-4">
-                <label htmlFor="phone" className="block mb-1">
+               <div className="mb-4">
+                <label htmlFor="phoneNumber" className="block mb-1">
                   Телефон
                 </label>
                 <input
                   type="tel"
-                  name="phone"
-                  id="phone"
-                  value={loginData.phone}
+                  name="phoneNumber"
+                  id="phoneNumber"
+                  value={loginData.phoneNumber}
                   onChange={handleLoginInputChange}
                   className="border p-2 w-full rounded outline-none"
                   placeholder="Введите номер телефона"
