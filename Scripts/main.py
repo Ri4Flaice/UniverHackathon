@@ -97,7 +97,12 @@ async def create_event(
             user = await session.execute(select(AspNetUser).where(AspNetUser.Id == user_id))
             user = user.scalar()
             if user:
-                user.Rating = (user.Rating or 0) + 1  # Обновляем рейтинг
+                if eventStatus == 1:
+                    user.Rating = (user.Rating or 0) + 5
+                elif eventStatus == 2:
+                    user.Rating = (user.Rating or 0) + 3
+                elif eventStatus == 3:
+                    user.Rating = (user.Rating or 0) + 1
             else:
                 raise HTTPException(status_code=404, detail="Пользователь не найден")
 
