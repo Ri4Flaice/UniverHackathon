@@ -26,6 +26,8 @@ services:
       dockerfile: UniverHackathon.WebApi/Dockerfile
     ports:
       - "8081:8080"
+    depends_on:
+      - postgres
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     networks:
