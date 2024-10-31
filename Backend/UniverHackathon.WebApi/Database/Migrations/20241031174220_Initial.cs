@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -36,6 +36,7 @@ namespace UniverHackathon.WebApi.Database.Migrations
                     DateRegistration = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Status = table.Column<bool>(type: "boolean", nullable: false),
                     AccountType = table.Column<int>(type: "integer", nullable: false),
+                    Rating = table.Column<int>(type: "integer", nullable: false),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -174,7 +175,7 @@ namespace UniverHackathon.WebApi.Database.Migrations
                     DateStart = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DateEnd = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Address = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
-                    Coordinates = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    Coordinates = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     EventStatus = table.Column<int>(type: "integer", nullable: false),
                     Photo = table.Column<byte[]>(type: "bytea", nullable: true)
                 },

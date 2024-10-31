@@ -18,4 +18,6 @@ public class UserEntity : IdentityUser<Guid>
     
     public bool Status { get; set; }
     public AccountType AccountType { get; set; }
+    
+    public int Rating { get; set; }
 }

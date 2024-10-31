@@ -165,8 +165,8 @@ namespace UniverHackathon.WebApi.Database.Migrations
                         .HasColumnType("character varying(150)");
 
                     b.Property<string>("Coordinates")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("DateEnd")
                         .HasColumnType("timestamp with time zone");
@@ -254,6 +254,9 @@ namespace UniverHackathon.WebApi.Database.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");

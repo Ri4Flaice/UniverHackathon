@@ -48,4 +48,12 @@ public class UserController : ControllerBase
 
         return await userConstructor.EditUserInDb(request);
     }
+
+    [HttpGet("getUserRatingList")]
+    public async Task<IEnumerable<UserRating>> GetUserRatingList()
+    {
+        var getListUserRatingConstructor = new GetListUserRating(_dbContext);
+
+        return await getListUserRatingConstructor.GetUsersRating();
+    }
 }
