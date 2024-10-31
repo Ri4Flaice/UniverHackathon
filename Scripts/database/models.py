@@ -40,7 +40,7 @@ class Event(Base):
     DateStart = Column(TIMESTAMP(timezone=True), nullable=False)
     DateEnd = Column(TIMESTAMP(timezone=True), nullable=False)
     Address = Column(String(150))
-    Coordinates = Column(String(20))
+    Coordinates = Column(String(100))
     EventStatus = Column(Integer, nullable=False)
     Photo = Column(LargeBinary)
 
