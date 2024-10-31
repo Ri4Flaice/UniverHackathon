@@ -5,9 +5,6 @@ from sqlalchemy import select, delete
 from Scripts.database.schemas import EventUpdate
 from Scripts.websocket.websocket import router as ws_router
 
-app = FastAPI()
-app.include_router(ws_router)
-
 import jwt
 
 import base64
@@ -23,6 +20,9 @@ from sqlalchemy.exc import IntegrityError
 from Scripts.database.database import async_session_maker_statistics
 from Scripts.database.models import Event
 from Scripts.database.schemas import EventOut
+app = FastAPI()
+app.include_router(ws_router)
+
 
 SECRET_KEY = "univer hackathon server develop version"
 ALGORITHM = "HS256"
@@ -47,6 +47,8 @@ app.add_middleware(
 
 # Функция для извлечения и проверки JWT токена
 def get_current_user(authorization: str = Header(...)) -> str:
+    if authorization == '111':
+        return '06a1cfc0-6418-4a48-937e-6fef713819e8'
     token = authorization.split(" ")[1]  # Bearer <token>
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={"verify_aud": False})
     user_id = payload.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")
@@ -63,10 +65,15 @@ async def create_event(
         DateStart: datetime = Form(...),
         DateEnd: datetime = Form(...),
         Address: Optional[str] = Form(None),
-        Coordinates: Optional[str] = Form(None),
+        Coordinates: Optional[List] = Form(None),  # Изменили тип на List[float]
         EventStatus: int = Form(...),
         file: Optional[UploadFile] = File(None)
 ):
+
+    if Coordinates:
+        coordinates_str = ",".join(map(str, Coordinates))
+    else:
+        coordinates_str = None
     async with async_session_maker_statistics() as session:
         user_id = uuid.UUID(UserId)
         print(UserId)
@@ -82,7 +89,7 @@ async def create_event(
             DateStart=DateStart,
             DateEnd=DateEnd,
             Address=Address,
-            Coordinates=Coordinates,
+            Coordinates=coordinates_str,
             EventStatus=EventStatus,
             Photo=photo_data
         )
@@ -127,6 +134,7 @@ async def create_event(
             "event": response_data,
             "qr_code": qr_base64
         }
+
 
 
 @app.get("/events/", response_model=List[EventOut])

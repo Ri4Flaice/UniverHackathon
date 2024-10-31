@@ -9,6 +9,7 @@
         body { padding: 20px; }
         .event-details { margin-top: 20px; }
         .qr-code { margin-top: 20px; }
+        .coordinate-group { margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -39,10 +40,13 @@
                 <label for="address">Адрес</label>
                 <input type="text" class="form-control" id="address">
             </div>
-            <div class="form-group">
+            <div class="form-group" id="coordinates-container">
                 <label for="coordinates">Координаты</label>
-                <input type="text" class="form-control" id="coordinates">
+                <div class="coordinate-group">
+                    <input type="text" class="form-control" placeholder="Введите координаты" required>
+                </div>
             </div>
+            <button type="button" class="btn btn-secondary" id="add-coordinate">Добавить координаты</button>
             <div class="form-group">
                 <label for="eventStatus">Статус события</label>
                 <input type="number" class="form-control" id="eventStatus" required>
@@ -71,6 +75,14 @@
     </div>
 
     <script>
+        document.getElementById('add-coordinate').addEventListener('click', function() {
+            const coordinatesContainer = document.getElementById('coordinates-container');
+            const newCoordinateGroup = document.createElement('div');
+            newCoordinateGroup.className = 'coordinate-group';
+            newCoordinateGroup.innerHTML = '<input type="text" class="form-control" placeholder="Введите координаты" required>';
+            coordinatesContainer.appendChild(newCoordinateGroup);
+        });
+
         document.getElementById('event-form').addEventListener('submit', async function(event) {
             event.preventDefault(); // Отменяем стандартное поведение формы
 
@@ -81,7 +93,12 @@
             formData.append('DateStart', document.getElementById('dateStart').value);
             formData.append('DateEnd', document.getElementById('dateEnd').value);
             formData.append('Address', document.getElementById('address').value);
-            formData.append('Coordinates', document.getElementById('coordinates').value);
+
+            // Получаем все координаты
+            const coordinatesInputs = document.querySelectorAll('#coordinates-container input[type="text"]');
+            const coordinatesArray = Array.from(coordinatesInputs).map(input => input.value);
+            formData.append('Coordinates', coordinatesArray); // Передаем массив координат
+
             formData.append('EventStatus', document.getElementById('eventStatus').value);
             formData.append('file', document.getElementById('file').files[0]);
 
@@ -89,7 +106,7 @@
                 const response = await fetch('http://127.0.0.1:8011/events/', {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9tb2JpbGVwaG9uZSI6Iis3NzA3MTIzNDU2NyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiNDAzYzllOWMtYjliNS00N2NlLTkzNjYtYTViNWE4NjZhMmFjIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjpbIkFkbWluIiwiQWRtaW4iXSwiZXhwIjoxNzMwNDIzNTE5LCJpc3MiOiJ1bml2ZXIgaGFja2F0aG9uIHNlcnZlciIsImF1ZCI6InVuaXZlciBoYWNrYXRob24gc2VydmVyIn0.QImDMb9cajO56tXNgxF3wZ2p5z53vkmSGNVrmRLXx8E',
+                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9tb2JpbGVwaG9uZSI6Iis3NzA3MTIzNDU2NyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiNDAzYzllOWMtYjliNS00N2NlLTkzNjYtYTViNWE4NjZhMmFjIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjpbIkFkbWluIiwiQWRtaW4iXSwiZXhwIjoxNzMwNDIzNTE5LCJpc3MiOiJ1bml2ZXIgaGFja2F0aG9uIHNlcnZlciIsImF1ZCI6InVuaXZlciBoYWNrYXRob24gc2VydmVyIn0.QImDMb9cajO56tXNgxF3wZ2p5z53vkmSGNVrmRLXx8E', // Замените на ваш токен
                     },
                     body: formData
                 });
