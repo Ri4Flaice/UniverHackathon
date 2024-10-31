@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { load } from "@2gis/mapgl";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 const Map = () => {
+  const { token } = useAuth();
   const [query, setQuery] = useState("");
   const [formVisible, setFormVisible] = useState(false);
   const [formData, setFormData] = useState({
@@ -12,7 +14,7 @@ const Map = () => {
     dateEnd: "",
     address: "",
     coordinates: null,
-    eventStatus: "",
+    eventStatus: "", // Keep it as a string initially
     file: null,
   });
   const mapContainer = useRef(null);
@@ -21,20 +23,6 @@ const Map = () => {
   const url = `https://catalog.api.2gis.com/3.0/items/geocode?q=${query}&fields=items.point&key=${
     import.meta.env.VITE_MAP_KEY
   }`;
-
-  const someExample = async (url, data, token) => {
-    try {
-      const response = await axios.post(url, data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error posting data:", error);
-      throw error;
-    }
-  };
 
   useEffect(() => {
     const initializeMap = async () => {
@@ -48,8 +36,8 @@ const Map = () => {
 
       // Add click event listener to the map
       map.on("click", (event) => {
-        const coordinates = event.lngLat;
-        console.log("Clicked coordinates:", coordinates);
+        const coordinates = event.lngLat.map(String); // Convert to array of strings
+        console.log("Clicked coordinates (as strings):", coordinates);
         setFormData((prev) => ({ ...prev, coordinates }));
         setFormVisible(true);
       });
@@ -82,14 +70,47 @@ const Map = () => {
     const { name, value, files } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: files ? files[0] : value,
+      [name]: name === "eventStatus" ? Number(value) : files ? files[0] : value, // Convert eventStatus to a number
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted with data:", formData);
-    setFormVisible(false);
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("name", formData.name);
+    formDataToSend.append("description", formData.description);
+    formDataToSend.append(
+      "dateStart",
+      new Date(formData.dateStart).toISOString()
+    ); // Convert to ISO 8601 format
+    formDataToSend.append("dateEnd", new Date(formData.dateEnd).toISOString()); // Convert to ISO 8601 format
+    formDataToSend.append("address", formData.address);
+    formDataToSend.append(
+      "coordinates",
+      formData.coordinates
+        ? JSON.stringify(formData.coordinates.map(String))
+        : null
+    ); // Convert coordinates to an array of strings
+    formDataToSend.append("eventStatus", formData.eventStatus); // Send as a number
+    formDataToSend.append("file", formData.file);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8008/events",
+        formDataToSend,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Response:", response.data);
+      setFormVisible(false);
+    } catch (error) {
+      console.error("Error posting data:", error);
+    }
   };
 
   return (
@@ -165,9 +186,9 @@ const Map = () => {
                 placeholder="Координаты"
                 value={
                   formData.coordinates
-                    ? `${formData.coordinates[0]}, ${formData.coordinates[1]}`
+                    ? JSON.stringify(formData.coordinates)
                     : ""
-                }
+                } // Show the string coordinates
                 readOnly
                 className="border p-2 w-full rounded-lg mb-2"
               />

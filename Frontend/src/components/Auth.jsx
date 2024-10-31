@@ -14,7 +14,7 @@ const Auth = () => {
     email: "",
   });
   const [loginData, setLoginData] = useState({
-    phone: "",
+    phoneNumber: "",
     password: "",
   });
 
