@@ -11,8 +11,9 @@ from sqlalchemy.exc import IntegrityError
 from Scripts.database.database import async_session_maker_statistics
 from Scripts.database.models import Event
 from Scripts.database.schemas import EventOut, EventUpdate
-
+from Scripts.websocket.websocket import router as ws_router
 app = FastAPI()
+app.include_router(ws_router)
 
 
 @app.post("/events/", response_model=EventOut, status_code=status.HTTP_201_CREATED)
@@ -25,15 +26,17 @@ async def create_event(
         Address: Optional[str] = Form(None),
         Coordinates: Optional[str] = Form(None),
         EventStatus: int = Form(...),
-        file: UploadFile = File(...)
+        file: Optional[UploadFile] = File(None)
 ):
     async with async_session_maker_statistics() as session:
-        # Преобразуем UserId в UUID
         user_id = uuid.UUID(UserId)
 
-        # Читаем содержимое файла и конвертируем в бинарный формат
         try:
-            photo_data = await file.read()
+            if file is not None:
+                photo_data = await file.read()
+            else:
+                photo_data = None
+
         except Exception as e:
             raise HTTPException(status_code=400, detail="Не удалось прочитать файл")
 

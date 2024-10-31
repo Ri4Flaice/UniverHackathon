@@ -5,3 +5,5 @@ obj/
 appsettings.Local.json
 venv
 !.gitignore
+Scripts/test.html
+Scripts/websocket/test.html

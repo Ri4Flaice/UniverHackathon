@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создание события</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+        }
+        .event-details {
+            margin-top: 20px;
+        }
+        .qr-code {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Создание события</h1>
+        <form id="event-form">
+            <div class="form-group">
+                <label for="userId">User ID</label>
+                <input type="text" class="form-control" id="userId" required>
+            </div>
+            <div class="form-group">
+                <label for="name">Название события</label>
+                <input type="text" class="form-control" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Описание</label>
+                <textarea class="form-control" id="description"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="dateStart">Дата начала</label>
+                <input type="datetime-local" class="form-control" id="dateStart" required>
+            </div>
+            <div class="form-group">
+                <label for="dateEnd">Дата окончания</label>
+                <input type="datetime-local" class="form-control" id="dateEnd" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Адрес</label>
+                <input type="text" class="form-control" id="address">
+            </div>
+            <div class="form-group">
+                <label for="coordinates">Координаты</label>
+                <input type="text" class="form-control" id="coordinates">
+            </div>
+            <div class="form-group">
+                <label for="eventStatus">Статус события</label>
+                <input type="number" class="form-control" id="eventStatus" required>
+            </div>
+            <div class="form-group">
+                <label for="file">Фото события</label>
+                <input type="file" class="form-control" id="file" accept="image/*" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Создать событие</button>
+        </form>
+
+        <div class="event-details" id="event-details" style="display: none;">
+            <h2 id="event-name">Событие создано</h2>
+            <p><strong>Описание:</strong> <span id="event-description"></span></p>
+            <p><strong>Дата начала:</strong> <span id="event-date-start"></span></p>
+            <p><strong>Дата окончания:</strong> <span id="event-date-end"></span></p>
+            <p><strong>Адрес:</strong> <span id="event-address"></span></p>
+            <p><strong>Координаты:</strong> <span id="event-coordinates"></span></p>
+            <p><strong>Статус события:</strong> <span id="event-status"></span></p>
+        </div>
+
+        <div class="qr-code" id="qr-code" style="display: none;">
+            <h3>QR Код:</h3>
+            <img id="qr-code-image" src="" alt="QR код" style="max-width: 200px;">
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('event-form').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Отменяем стандартное поведение формы
+
+            const formData = new FormData();
+            formData.append('UserId', document.getElementById('userId').value);
+            formData.append('Name', document.getElementById('name').value);
+            formData.append('Description', document.getElementById('description').value);
+            formData.append('DateStart', document.getElementById('dateStart').value);
+            formData.append('DateEnd', document.getElementById('dateEnd').value);
+            formData.append('Address', document.getElementById('address').value);
+            formData.append('Coordinates', document.getElementById('coordinates').value);
+            formData.append('EventStatus', document.getElementById('eventStatus').value);
+            formData.append('file', document.getElementById('file').files[0]);
+
+            try {
+                const response = await fetch('http://127.0.0.1:8010/events/', { // Замените на ваш API URL
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка при создании события');
+                }
+
+                const eventData = await response.json();
+                displayEventData(eventData);
+            } catch (error) {
+                console.error(error);
+                alert('Не удалось создать событие');
+            }
+        });
+
+        function displayEventData(event) {
+            document.getElementById('event-name').innerText = event.Name;
+            document.getElementById('event-description').innerText = event.Description || 'Нет описания';
+            document.getElementById('event-date-start').innerText = new Date(event.DateStart).toLocaleString();
+            document.getElementById('event-date-end').innerText = new Date(event.DateEnd).toLocaleString();
+            document.getElementById('event-address').innerText = event.Address || 'Нет адреса';
+            document.getElementById('event-coordinates').innerText = event.Coordinates || 'Нет координат';
+            document.getElementById('event-status').innerText = event.EventStatus;
+
+            // Установка QR-кода
+            const qrCodeUrl = `http://yourwebsite.com/qrcodes/${event.EventId}`; // Замените на URL вашего QR-кода
+            document.getElementById('qr-code-image').src = qrCodeUrl;
+
+            // Показываем детали события и QR-код
+            document.getElementById('event-details').style.display = 'block';
+            document.getElementById('qr-code').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
