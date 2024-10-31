@@ -1,0 +1,21 @@
+services:
+  backend:
+    extends:
+      file: Backend/docker-compose.yml
+      service: backend
+    networks:
+      - univerHackathon.dev
+
+  postgres:
+    extends:
+      file: Backend/docker-compose.yml
+      service: postgres
+    networks:
+      - univerHackathon.dev
+
+networks:
+  univerHackathon.dev:
+    driver: bridge
+
+volumes:
+  postgres-data:

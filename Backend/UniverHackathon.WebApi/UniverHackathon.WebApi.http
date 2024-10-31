@@ -1,0 +1,6 @@
+@UniverHackathon.WebApi_HostAddress = http://localhost:5064
+
+GET {{UniverHackathon.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
