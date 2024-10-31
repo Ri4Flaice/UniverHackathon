@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi import Query
-from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select, delete
 
 from Scripts.database.schemas import EventUpdate
@@ -9,20 +8,6 @@ from Scripts.websocket.websocket import router as ws_router
 app = FastAPI()
 app.include_router(ws_router)
 
-origins = [
-    "http://localhost",
-    "http://localhost:63342",
-    "http://127.0.0.1:8010"
-]
-
-# Добавляем CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,  # Разрешенные источники
-    allow_credentials=True,
-    allow_methods=["*"],  # Разрешенные методы, например, ["GET", "POST"]
-    allow_headers=["*"],  # Разрешенные заголовки
-)
 import jwt
 
 import base64
@@ -31,19 +16,14 @@ import uuid
 from datetime import datetime
 from typing import List, Optional
 import qrcode
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, status, Depends, Header
+from fastapi import UploadFile, File, Form, HTTPException, status, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
 
 from Scripts.database.database import async_session_maker_statistics
 from Scripts.database.models import Event
 from Scripts.database.schemas import EventOut
-from Scripts.websocket.websocket import router as ws_router
 
-app = FastAPI()
-app.include_router(ws_router)
-
-# Config variables (импортируйте ваш конфиг здесь)
 SECRET_KEY = "univer hackathon server develop version"
 ALGORITHM = "HS256"
 
