@@ -3,12 +3,14 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from Scripts.database.database import Base
 
+
 class AspNetUser(Base):
     __tablename__ = "AspNetUsers"
 
     Id = Column(UUID(as_uuid=True), primary_key=True)  # UUID первичный ключ
     FullName = Column(String(100))
     Login = Column(String(100))
+    Rating = Column(Integer)
     DateRegistration = Column(TIMESTAMP(timezone=True), nullable=False)
     Status = Column(Boolean, nullable=False)
     UserName = Column(String(256))

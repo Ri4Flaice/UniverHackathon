@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
 
 from Scripts.database.database import async_session_maker_statistics
-from Scripts.database.models import Event
+from Scripts.database.models import Event, AspNetUser
 from Scripts.database.schemas import EventOut
 app = FastAPI()
 app.include_router(ws_router)
@@ -93,8 +93,17 @@ async def create_event(
 
         session.add(db_event)
         try:
+            # Находим пользователя по ID и увеличиваем его рейтинг
+            user = await session.execute(select(AspNetUser).where(AspNetUser.Id == user_id))
+            user = user.scalar()
+            if user:
+                user.Rating = (user.Rating or 0) + 1  # Обновляем рейтинг
+            else:
+                raise HTTPException(status_code=404, detail="Пользователь не найден")
+
             await session.commit()
             await session.refresh(db_event)
+
         except IntegrityError:
             await session.rollback()
             raise HTTPException(status_code=400, detail="Некорректные данные")
