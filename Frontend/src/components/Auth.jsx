@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 const Auth = () => {
   const [registerShow, setRegisterShow] = useState(false);
   const [loginShow, setLoginShow] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [registerData, setRegisterData] = useState({
     fullName: "",
     login: "",
@@ -17,12 +18,7 @@ const Auth = () => {
     password: "",
   });
 
-  useEffect(() => {
-    const token = localStorage.getItem("jwtToken");
-    if (token) {
-      setIsLoggedIn(true);
-    }
-  }, []);
+  const { isLoggedIn, login, logout } = useAuth();
 
   const handleRegisterInputChange = (e) => {
     const { name, value } = e.target;
@@ -37,16 +33,7 @@ const Auth = () => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:8081/api/User/create",
-        {
-          phoneNumber: registerData.phoneNumber,
-          password: registerData.password,
-          fullName: registerData.fullName,
-          login: registerData.login,
-          email: registerData.email,
-        }
-      );
+      await axios.post("http://localhost:8081/api/User/create", registerData);
       setRegisterShow(false);
     } catch (error) {
       console.error("Registration failed:", error);
@@ -55,26 +42,8 @@ const Auth = () => {
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post(
-        "http://localhost:8081/api/User/login",
-        {
-          phoneNumber: loginData.phone,
-          password: loginData.password,
-        }
-      );
-      const token = response.data;
-      localStorage.setItem("jwtToken", token);
-      setIsLoggedIn(true);
-      setLoginShow(false);
-    } catch (error) {
-      console.error("Login failed:", error);
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("jwtToken");
-    setIsLoggedIn(false);
+    await login(loginData);
+    setLoginShow(false);
   };
 
   return (
@@ -96,93 +65,41 @@ const Auth = () => {
         </div>
       ) : (
         <button
-          onClick={handleLogout}
+          onClick={logout}
           className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 transition"
         >
           Выйти
         </button>
       )}
-      {/* Registration Modal */}
+
       {registerShow && (
         <div className="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 shadow-md w-96 text-black">
             <h2 className="text-xl font-bold mb-4">Регистрация</h2>
             <form onSubmit={handleRegisterSubmit}>
-              <div className="mb-4">
-                <label htmlFor="fullName" className="block mb-1">
-                  Имя
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  id="fullName"
-                  value={registerData.fullName}
-                  onChange={handleRegisterInputChange}
-                  className="border p-2 w-full rounded outline-none"
-                  placeholder="Введите ваше имя"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="login" className="block mb-1">
-                  Логин
-                </label>
-                <input
-                  type="text"
-                  name="login"
-                  id="login"
-                  value={registerData.login}
-                  onChange={handleRegisterInputChange}
-                  className="border p-2 w-full rounded outline-none"
-                  placeholder="Введите логин"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="password" className="block mb-1">
-                  Пароль
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  id="password"
-                  value={registerData.password}
-                  onChange={handleRegisterInputChange}
-                  className="border p-2 w-full rounded outline-none"
-                  placeholder="Введите пароль"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="phoneNumber" className="block mb-1">
-                  Телефон
-                </label>
-                <input
-                  type="tel"
-                  name="phoneNumber"
-                  id="phoneNumber"
-                  value={registerData.phoneNumber}
-                  onChange={handleRegisterInputChange}
-                  className="border p-2 w-full rounded outline-none"
-                  placeholder="Введите номер телефона"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="email" className="block mb-1">
-                  Почта
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  value={registerData.email}
-                  onChange={handleRegisterInputChange}
-                  className="border p-2 w-full rounded outline-none"
-                  placeholder="Введите почту"
-                  required
-                />
-              </div>
+              {["fullName", "login", "password", "phoneNumber", "email"].map(
+                (field, idx) => (
+                  <div className="mb-4" key={idx}>
+                    <label htmlFor={field} className="block mb-1">
+                      {field === "fullName"
+                        ? "Имя"
+                        : field === "phoneNumber"
+                        ? "Телефон"
+                        : field}
+                    </label>
+                    <input
+                      type={field === "password" ? "password" : "text"}
+                      name={field}
+                      id={field}
+                      value={registerData[field]}
+                      onChange={handleRegisterInputChange}
+                      className="border p-2 w-full rounded outline-none"
+                      placeholder={`Введите ${field}`}
+                      required
+                    />
+                  </div>
+                )
+              )}
               <button
                 type="submit"
                 className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
