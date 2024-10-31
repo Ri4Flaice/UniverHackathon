@@ -20,6 +20,8 @@ from sqlalchemy.exc import IntegrityError
 from Scripts.database.database import async_session_maker_statistics
 from Scripts.database.models import Event, AspNetUser
 from Scripts.database.schemas import EventOut
+from Scripts.websocket.websocket_manager import manager
+
 app = FastAPI()
 app.include_router(ws_router)
 
@@ -139,7 +141,19 @@ async def create_event(
             EventStatus=db_event.EventStatus,
             Photo=base64.b64encode(photo_data).decode('utf-8') if photo_data else None
         )
-
+        notification_data = {
+            "type": "new_event",
+            "eventId": str(db_event.EventId),
+            "name": db_event.Name,
+            "description": db_event.Description,
+            "dateStart": db_event.DateStart.isoformat(),
+            "dateEnd": db_event.DateEnd.isoformat(),
+            "address": db_event.Address,
+            "coordinates": db_event.Coordinates,
+            "eventStatus": db_event.EventStatus
+        }
+        # Рассылка уведомления всем подключенным клиентам
+        await manager.broadcast_json(notification_data)
         # Возвращаем данные события и QR-код в base64
         return {
             "event": response_data,
