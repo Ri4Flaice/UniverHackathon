@@ -6,15 +6,9 @@
     <title>Создание события</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            padding: 20px;
-        }
-        .event-details {
-            margin-top: 20px;
-        }
-        .qr-code {
-            margin-top: 20px;
-        }
+        body { padding: 20px; }
+        .event-details { margin-top: 20px; }
+        .qr-code { margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -92,8 +86,11 @@
             formData.append('file', document.getElementById('file').files[0]);
 
             try {
-                const response = await fetch('http://127.0.0.1:8010/events/', { // Замените на ваш API URL
+                const response = await fetch('http://127.0.0.1:8011/events/', {
                     method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9tb2JpbGVwaG9uZSI6Iis3NzA3MTIzNDU2NyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiNDAzYzllOWMtYjliNS00N2NlLTkzNjYtYTViNWE4NjZhMmFjIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjpbIkFkbWluIiwiQWRtaW4iXSwiZXhwIjoxNzMwNDIzNTE5LCJpc3MiOiJ1bml2ZXIgaGFja2F0aG9uIHNlcnZlciIsImF1ZCI6InVuaXZlciBoYWNrYXRob24gc2VydmVyIn0.QImDMb9cajO56tXNgxF3wZ2p5z53vkmSGNVrmRLXx8E',
+                    },
                     body: formData
                 });
 
@@ -118,11 +115,9 @@
             document.getElementById('event-coordinates').innerText = event.Coordinates || 'Нет координат';
             document.getElementById('event-status').innerText = event.EventStatus;
 
-            // Установка QR-кода
-            const qrCodeUrl = `http://yourwebsite.com/qrcodes/${event.EventId}`; // Замените на URL вашего QR-кода
+            const qrCodeUrl = `http://yourwebsite.com/qrcodes/${event.EventId}`;
             document.getElementById('qr-code-image').src = qrCodeUrl;
 
-            // Показываем детали события и QR-код
             document.getElementById('event-details').style.display = 'block';
             document.getElementById('qr-code').style.display = 'block';
         }

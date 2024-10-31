@@ -1,24 +1,81 @@
+from fastapi import FastAPI
+from fastapi import Query
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import select, delete
+
+from Scripts.database.schemas import EventUpdate
+from Scripts.websocket.websocket import router as ws_router
+
+app = FastAPI()
+app.include_router(ws_router)
+
+origins = [
+    "http://localhost",
+    "http://localhost:63342",
+    "http://127.0.0.1:8010"
+]
+
+# Добавляем CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Разрешенные источники
+    allow_credentials=True,
+    allow_methods=["*"],  # Разрешенные методы, например, ["GET", "POST"]
+    allow_headers=["*"],  # Разрешенные заголовки
+)
+import jwt
+
 import base64
+import io
 import uuid
 from datetime import datetime
 from typing import List, Optional
-
-from fastapi import FastAPI, UploadFile, File, HTTPException, status, Form
-from fastapi import Query
-from sqlalchemy import select, delete
+import qrcode
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, status, Depends, Header
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
 
 from Scripts.database.database import async_session_maker_statistics
 from Scripts.database.models import Event
-from Scripts.database.schemas import EventOut, EventUpdate
+from Scripts.database.schemas import EventOut
 from Scripts.websocket.websocket import router as ws_router
+
 app = FastAPI()
 app.include_router(ws_router)
 
+# Config variables (импортируйте ваш конфиг здесь)
+SECRET_KEY = "univer hackathon server develop version"
+ALGORITHM = "HS256"
 
-@app.post("/events/", response_model=EventOut, status_code=status.HTTP_201_CREATED)
+origins = [
+    "http://localhost",
+    "http://localhost:63342",
+    "http://127.0.0.1:8010"
+]
+
+# Добавляем CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# Функция для извлечения и проверки JWT токена
+def get_current_user(authorization: str = Header(...)) -> str:
+    token = authorization.split(" ")[1]  # Bearer <token>
+    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={"verify_aud": False})
+    user_id = payload.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID отсутствует в токене")
+    return user_id
+
+
+@app.post("/events/", status_code=status.HTTP_201_CREATED)
 async def create_event(
-        UserId: str = Form(...),
+        UserId: str = Depends(get_current_user),  # Автоматически получаем UserId из токена
         Name: Optional[str] = Form(None),
         Description: Optional[str] = Form(None),
         DateStart: datetime = Form(...),
@@ -30,14 +87,10 @@ async def create_event(
 ):
     async with async_session_maker_statistics() as session:
         user_id = uuid.UUID(UserId)
-
+        print(UserId)
         try:
-            if file is not None:
-                photo_data = await file.read()
-            else:
-                photo_data = None
-
-        except Exception as e:
+            photo_data = await file.read() if file else None
+        except Exception:
             raise HTTPException(status_code=400, detail="Не удалось прочитать файл")
 
         db_event = Event(
@@ -60,10 +113,23 @@ async def create_event(
             await session.rollback()
             raise HTTPException(status_code=400, detail="Некорректные данные")
 
+        # Генерация QR-кода с ID события
+        event_id = str(db_event.EventId)
+        qr_data = f"https://yourwebsite.com/events/{event_id}"
+        qr_image = qrcode.make(qr_data)
+
+        # Сохраняем QR-код в байтовый поток
+        img_byte_arr = io.BytesIO()
+        qr_image.save(img_byte_arr, format='PNG')
+        img_byte_arr.seek(0)
+
+        # Кодируем QR-код в base64
+        qr_base64 = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
+
         # Подготавливаем данные для ответа
         response_data = EventOut(
             EventId=db_event.EventId,
-            UserId=str(db_event.UserId),  # Преобразуем UUID в строку
+            UserId=str(db_event.UserId),
             Name=db_event.Name,
             Description=db_event.Description,
             DateStart=db_event.DateStart,
@@ -71,11 +137,14 @@ async def create_event(
             Address=db_event.Address,
             Coordinates=db_event.Coordinates,
             EventStatus=db_event.EventStatus,
-            Photo=None
-
+            Photo=base64.b64encode(photo_data).decode('utf-8') if photo_data else None
         )
 
-        return response_data
+        # Возвращаем данные события и QR-код в base64
+        return {
+            "event": response_data,
+            "qr_code": qr_base64
+        }
 
 
 @app.get("/events/", response_model=List[EventOut])
