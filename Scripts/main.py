@@ -50,7 +50,7 @@ ALGORITHM = "HS256"
 origins = [
     "http://localhost",
     "http://localhost:63342",
-    "http://127.0.0.1:8010"
+    "http://127.0.0.1:8008"
 ]
 
 # Добавляем CORS middleware
