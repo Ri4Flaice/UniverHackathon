@@ -11,6 +11,7 @@ const Map = () => {
   }`;
 
   useEffect(() => {
+    console.log("map use effect run");
     let map;
     const initializeMap = async () => {
       const mapglAPI = await load();
@@ -54,21 +55,25 @@ const Map = () => {
   };
 
   return (
-    <div className="mt-2 w-full rounded-[10px] overflow-hidden p-2">
+    <div className="w-full rounded-lg overflow-hidden p-2">
       <input
         type="text"
         placeholder="Введите адрес..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="border p-2 w-full outline-none rounded"
+        className="border p-2 w-full outline-none rounded-lg"
       />
       <button
         onClick={handleSearch}
-        className="bg-blue-500 text-white py-2 px-10 rounded my-4"
+        className="bg-blue-500 text-white py-2 px-10 rounded-lg my-4"
       >
         Найти
       </button>
-      <div ref={mapContainer} style={{ width: "100%", height: "700px" }} />
+      <div
+        ref={mapContainer}
+        style={{ width: "100%", height: "500px" }}
+        className="rounded-lg overflow-hidden"
+      />
     </div>
   );
 };
