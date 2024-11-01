@@ -191,7 +191,6 @@ async def get_all_events():
         result = await session.execute(select(Event))
         events = result.scalars().all()
 
-        # Формируем ответ с преобразованием фото в base64
         return [
             EventOut(
                 EventId=event.EventId,
