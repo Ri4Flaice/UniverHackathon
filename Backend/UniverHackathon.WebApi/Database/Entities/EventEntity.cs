@@ -27,7 +27,7 @@ public class EventEntity
     [MaxLength(150)]
     public string? Address { get; set; }
     
-    [MaxLength(20)]
+    [MaxLength(100)]
     public string? Coordinates { get; set; }
     
     public EventStatus EventStatus { get; set; }

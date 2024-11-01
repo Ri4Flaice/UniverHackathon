@@ -36,6 +36,7 @@ namespace UniverHackathon.WebApi.Database.Migrations
                     DateRegistration = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Status = table.Column<bool>(type: "boolean", nullable: false),
                     AccountType = table.Column<int>(type: "integer", nullable: false),
+                    Rating = table.Column<int>(type: "integer", nullable: false),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -174,7 +175,7 @@ namespace UniverHackathon.WebApi.Database.Migrations
                     DateStart = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DateEnd = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Address = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
-                    Coordinates = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    Coordinates = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     EventStatus = table.Column<int>(type: "integer", nullable: false),
                     Photo = table.Column<byte[]>(type: "bytea", nullable: true)
                 },
@@ -183,6 +184,27 @@ namespace UniverHackathon.WebApi.Database.Migrations
                     table.PrimaryKey("PK_events", x => x.EventId);
                     table.ForeignKey(
                         name: "FK_events_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "offers",
+                columns: table => new
+                {
+                    OfferId = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Topic = table.Column<string>(type: "text", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_offers", x => x.OfferId);
+                    table.ForeignKey(
+                        name: "FK_offers_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -230,6 +252,11 @@ namespace UniverHackathon.WebApi.Database.Migrations
                 name: "IX_events_UserId",
                 table: "events",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_offers_UserId",
+                table: "offers",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -252,6 +279,9 @@ namespace UniverHackathon.WebApi.Database.Migrations
 
             migrationBuilder.DropTable(
                 name: "events");
+
+            migrationBuilder.DropTable(
+                name: "offers");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

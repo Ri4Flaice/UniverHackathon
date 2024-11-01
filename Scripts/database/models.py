@@ -3,12 +3,14 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from Scripts.database.database import Base
 
+
 class AspNetUser(Base):
     __tablename__ = "AspNetUsers"
 
     Id = Column(UUID(as_uuid=True), primary_key=True)  # UUID первичный ключ
     FullName = Column(String(100))
     Login = Column(String(100))
+    Rating = Column(Integer)
     DateRegistration = Column(TIMESTAMP(timezone=True), nullable=False)
     Status = Column(Boolean, nullable=False)
     UserName = Column(String(256))
@@ -40,7 +42,7 @@ class Event(Base):
     DateStart = Column(TIMESTAMP(timezone=True), nullable=False)
     DateEnd = Column(TIMESTAMP(timezone=True), nullable=False)
     Address = Column(String(150))
-    Coordinates = Column(String(20))
+    Coordinates = Column(String(100))
     EventStatus = Column(Integer, nullable=False)
     Photo = Column(LargeBinary)
 

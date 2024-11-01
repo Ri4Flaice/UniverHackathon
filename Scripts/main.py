@@ -18,8 +18,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
 
 from Scripts.database.database import async_session_maker_statistics
-from Scripts.database.models import Event
+from Scripts.database.models import Event, AspNetUser
 from Scripts.database.schemas import EventOut
+from Scripts.websocket.websocket_manager import manager
+
 app = FastAPI()
 app.include_router(ws_router)
 
@@ -28,23 +30,20 @@ SECRET_KEY = "univer hackathon server develop version"
 ALGORITHM = "HS256"
 
 origins = [
-    "http://localhost",
-    "http://localhost:63342",
-    "http://127.0.0.1:8008",
     "http://localhost:5173",
+    "http://localhost",
+    "http://127.0.0.1:8008",
+    "http://localhost:63342",
     "http://127.0.0.1:8010"
 ]
 
-# Добавляем CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,  # Разрешаем конкретные источники
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Разрешаем все методы (GET, POST и т. д.)
+    allow_headers=["*"],  # Разрешаем все заголовки
 )
-
-
 # Функция для извлечения и проверки JWT токена
 def get_current_user(authorization: str = Header(...)) -> str:
     if authorization == '111':
@@ -60,18 +59,18 @@ def get_current_user(authorization: str = Header(...)) -> str:
 @app.post("/events/", status_code=status.HTTP_201_CREATED)
 async def create_event(
         UserId: str = Depends(get_current_user),  # Автоматически получаем UserId из токена
-        Name: Optional[str] = Form(None),
-        Description: Optional[str] = Form(None),
-        DateStart: datetime = Form(...),
-        DateEnd: datetime = Form(...),
-        Address: Optional[str] = Form(None),
-        Coordinates: Optional[List] = Form(None),  # Изменили тип на List[float]
-        EventStatus: int = Form(...),
+        name: Optional[str] = Form(None),
+        description: Optional[str] = Form(None),
+        dateStart: datetime = Form(...),
+        dateEnd: datetime = Form(...),
+        address: Optional[str] = Form(None),
+        coordinates: Optional[List] = Form(None),  # Изменили тип на List[float]
+        eventStatus: int = Form(...),
         file: Optional[UploadFile] = File(None)
 ):
 
-    if Coordinates:
-        coordinates_str = ",".join(map(str, Coordinates))
+    if coordinates:
+        coordinates_str = ",".join(map(str, coordinates))
     else:
         coordinates_str = None
     async with async_session_maker_statistics() as session:
@@ -84,20 +83,34 @@ async def create_event(
 
         db_event = Event(
             UserId=user_id,
-            Name=Name,
-            Description=Description,
-            DateStart=DateStart,
-            DateEnd=DateEnd,
-            Address=Address,
+            Name=name,
+            Description=description,
+            DateStart=dateStart,
+            DateEnd=dateEnd,
+            Address=address,
             Coordinates=coordinates_str,
-            EventStatus=EventStatus,
+            EventStatus=eventStatus,
             Photo=photo_data
         )
 
         session.add(db_event)
         try:
+            # Находим пользователя по ID и увеличиваем его рейтинг
+            user = await session.execute(select(AspNetUser).where(AspNetUser.Id == user_id))
+            user = user.scalar()
+            if user:
+                if eventStatus == 1:
+                    user.Rating = (user.Rating or 0) + 5
+                elif eventStatus == 2:
+                    user.Rating = (user.Rating or 0) + 3
+                elif eventStatus == 3:
+                    user.Rating = (user.Rating or 0) + 1
+            else:
+                raise HTTPException(status_code=404, detail="Пользователь не найден")
+
             await session.commit()
             await session.refresh(db_event)
+
         except IntegrityError:
             await session.rollback()
             raise HTTPException(status_code=400, detail="Некорректные данные")
@@ -128,7 +141,19 @@ async def create_event(
             EventStatus=db_event.EventStatus,
             Photo=base64.b64encode(photo_data).decode('utf-8') if photo_data else None
         )
-
+        notification_data = {
+            "type": "new_event",
+            "eventId": str(db_event.EventId),
+            "name": db_event.Name,
+            "description": db_event.Description,
+            "dateStart": db_event.DateStart.isoformat(),
+            "dateEnd": db_event.DateEnd.isoformat(),
+            "address": db_event.Address,
+            "coordinates": db_event.Coordinates,
+            "eventStatus": db_event.EventStatus
+        }
+        # Рассылка уведомления всем подключенным клиентам
+        await manager.broadcast_json(notification_data)
         # Возвращаем данные события и QR-код в base64
         return {
             "event": response_data,
