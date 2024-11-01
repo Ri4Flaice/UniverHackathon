@@ -52,10 +52,10 @@ public class EventController : ControllerBase
 
     [HttpDelete("deleteInvalid")]
     [Authorize(Roles = UserRoles.Admin)]
-    public async Task<bool> DeleteInvalidEvent(EventModel eventModel)
+    public async Task<bool> DeleteInvalidEvent([FromQuery] long eventId)
     {
         var deleteInvalidEventConstructor = new DeleteInvalidEvent(_dbContext);
 
-        return await deleteInvalidEventConstructor.DeleteInvalidEventInDb(eventModel);
+        return await deleteInvalidEventConstructor.DeleteInvalidEventInDb(eventId);
     }
 }

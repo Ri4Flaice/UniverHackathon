@@ -34,11 +34,20 @@ public class OfferController : ControllerBase
 
     [HttpGet("getOffers")]
     [Authorize(Roles = UserRoles.Admin)]
-    public async Task<List<OffersResponse>> GetOffers()
+    public async Task<List<OfferResponse>> GetOffers()
     {
         var getOffersConstructor = new GetOffers(_dbContext);
 
         return await getOffersConstructor.GetOffersFromDb();
+    }
+
+    [HttpPatch("update")]
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<OfferResponse> EditOffer([FromQuery] long offerId)
+    {
+        var editOfferConstructor = new EditOffer(_dbContext);
+
+        return await editOfferConstructor.EditOfferInDb(offerId);
     }
 
     [HttpDelete("deleteOffer")]

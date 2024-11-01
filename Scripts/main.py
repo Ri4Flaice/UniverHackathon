@@ -25,7 +25,6 @@ from Scripts.websocket.websocket_manager import manager
 app = FastAPI()
 app.include_router(ws_router)
 
-
 SECRET_KEY = "univer hackathon server develop version"
 ALGORITHM = "HS256"
 
@@ -44,6 +43,8 @@ app.add_middleware(
     allow_methods=["*"],  # Разрешаем все методы (GET, POST и т. д.)
     allow_headers=["*"],  # Разрешаем все заголовки
 )
+
+
 # Функция для извлечения и проверки JWT токена
 def get_current_user(authorization: str = Header(...)) -> str:
     if authorization == '111':
@@ -68,7 +69,6 @@ async def create_event(
         eventStatus: int = Form(...),
         file: Optional[UploadFile] = File(None)
 ):
-
     if coordinates:
         coordinates_str = ",".join(map(str, coordinates))
     else:
@@ -161,7 +161,6 @@ async def create_event(
         }
 
 
-
 @app.get("/events/", response_model=List[EventOut])
 async def get_events(skip: int = Query(0), limit: int = Query(10)):
     async with async_session_maker_statistics() as session:
@@ -169,6 +168,29 @@ async def get_events(skip: int = Query(0), limit: int = Query(10)):
         events = result.scalars().all()
 
         # Формируем ответ с преобразованием фото в base64
+        return [
+            EventOut(
+                EventId=event.EventId,
+                UserId=event.UserId,
+                Name=event.Name,
+                Description=event.Description,
+                DateStart=event.DateStart,
+                DateEnd=event.DateEnd,
+                Address=event.Address,
+                Coordinates=event.Coordinates,
+                EventStatus=event.EventStatus,
+                Photo=base64.b64encode(event.Photo).decode('utf-8') if event.Photo else None
+            )
+            for event in events
+        ]
+
+
+@app.get("/events/all", response_model=List[EventOut])
+async def get_all_events():
+    async with async_session_maker_statistics() as session:
+        result = await session.execute(select(Event))
+        events = result.scalars().all()
+
         return [
             EventOut(
                 EventId=event.EventId,
