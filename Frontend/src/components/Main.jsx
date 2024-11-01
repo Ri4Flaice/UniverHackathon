@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import  '../style.css'
 
 const Main = () => {
   const [leaders, setLeaders] = useState([]);
@@ -42,7 +43,7 @@ const Main = () => {
       <div
           className="bg-cover bg-center min-h-screen p-6 relative"
           style={{
-            backgroundImage: "url('https://pkzsk.info/wp-content/uploads/2023/08/img_2004.jpg')",
+            backgroundImage: "url('https://i.imgur.com/BEPRJGP.jpeg')",
           }}
       >
         {/* Dark Overlay */}
