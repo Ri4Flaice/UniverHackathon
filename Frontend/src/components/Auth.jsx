@@ -122,7 +122,7 @@ const Auth = () => {
           <div className="bg-white rounded-lg p-6 shadow-md w-96 text-black">
             <h2 className="text-xl font-bold mb-4">Вход</h2>
             <form onSubmit={handleLoginSubmit}>
-               <div className="mb-4">
+              <div className="mb-4">
                 <label htmlFor="phoneNumber" className="block mb-1">
                   Телефон
                 </label>
