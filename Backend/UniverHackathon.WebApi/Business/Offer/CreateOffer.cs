@@ -20,6 +20,7 @@ public class CreateOffer
             UserId = userId,
             Topic = request.Topic,
             Description = request.Description,
+            Reviewed = false,
         };
 
         _dbContext.OfferEntities.Add(newOffer);

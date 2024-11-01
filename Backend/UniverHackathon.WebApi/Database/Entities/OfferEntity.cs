@@ -17,5 +17,7 @@ public class OfferEntity
     
     public string? Description { get; set; }
     
+    public bool Reviewed { get; set; }
+    
     public UserEntity? UserEntity { get; set; }
 }
