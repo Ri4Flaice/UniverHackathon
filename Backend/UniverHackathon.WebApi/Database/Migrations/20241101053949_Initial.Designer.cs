@@ -12,7 +12,7 @@ using UniverHackathon.WebApi.Database;
 namespace UniverHackathon.WebApi.Database.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241031191504_Initial")]
+    [Migration("20241101053949_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -211,6 +211,9 @@ namespace UniverHackathon.WebApi.Database.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
+
+                    b.Property<bool>("Reviewed")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Topic")
                         .HasColumnType("text");

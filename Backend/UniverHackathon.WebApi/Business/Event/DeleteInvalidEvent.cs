@@ -14,11 +14,11 @@ public class DeleteInvalidEvent
         _dbContext = dbContext;
     }
 
-    public async Task<bool> DeleteInvalidEventInDb(EventModel eventModel)
+    public async Task<bool> DeleteInvalidEventInDb(long eventId)
     {
         var existingEvent = await _dbContext
             .EventEntities
-            .SingleOrDefaultAsync(e => e.EventId == eventModel.EventId);
+            .SingleOrDefaultAsync(e => e.EventId == eventId);
 
         if (existingEvent == null)
             throw new Exception("Не найдено событие");

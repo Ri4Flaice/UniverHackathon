@@ -198,7 +198,8 @@ namespace UniverHackathon.WebApi.Database.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Topic = table.Column<string>(type: "text", nullable: true),
-                    Description = table.Column<string>(type: "text", nullable: true)
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    Reviewed = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {

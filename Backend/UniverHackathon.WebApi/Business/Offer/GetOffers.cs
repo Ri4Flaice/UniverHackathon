@@ -13,15 +13,16 @@ public class GetOffers
         _dbContext = dbContext;
     }
 
-    public async Task<List<OffersResponse>> GetOffersFromDb()
+    public async Task<List<OfferResponse>> GetOffersFromDb()
     {
         return await _dbContext
             .OfferEntities
-            .Select(offer => new OffersResponse
+            .Select(offer => new OfferResponse
             {
                 OfferId = offer.OfferId,
                 Topic = offer.Topic,
                 Description = offer.Description,
+                Reviewed = offer.Reviewed,
                 UserId = offer.UserId,
             })
             .ToListAsync();

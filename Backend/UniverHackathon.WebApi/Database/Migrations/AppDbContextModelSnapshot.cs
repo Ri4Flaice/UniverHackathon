@@ -209,6 +209,9 @@ namespace UniverHackathon.WebApi.Database.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<bool>("Reviewed")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Topic")
                         .HasColumnType("text");
 
